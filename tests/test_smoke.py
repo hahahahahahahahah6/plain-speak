@@ -149,6 +149,30 @@ class TestCLI(unittest.TestCase):
         with self.assertRaises((FileNotFoundError, OSError)):
             run_cli(["check", "/nonexistent/path/plain-speak-test.txt"])
 
+    def test_hard_wrapped_long_sentence_detected(self):
+        # A 32-word sentence hard-wrapped across lines must score the same
+        # as the unwrapped version (regression: wrapped lines were split,
+        # so the long sentence was never detected).
+        words = ["word%d" % i for i in range(32)]
+        sent = " ".join(words) + "."
+        wrapped = "\n".join(sent[i:i + 40] for i in range(0, len(sent), 40))
+        r_wrapped = plain_speak.analyze(wrapped)
+        r_plain = plain_speak.analyze(sent)
+        self.assertEqual(r_wrapped["stats"]["long_sentences"], 1)
+        self.assertEqual(r_wrapped["plainness"], r_plain["plainness"])
+
+    def test_fenced_code_blocks_excluded(self):
+        text = ("```python\n"
+                "x = leverage_the_api(deliverable)  # furthermore robust\n"
+                "```\n"
+                "This line is fine.\n")
+        result = plain_speak.analyze(text)
+        self.assertEqual(result["findings"], [])
+
+    def test_list_items_not_merged(self):
+        result = plain_speak.analyze("- short one\n- short two\n- short three\n")
+        self.assertEqual(result["stats"]["long_sentences"], 0)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

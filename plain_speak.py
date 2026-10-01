@@ -85,17 +85,87 @@ def count_syllables(word):
     return max(n, 1)
 
 
-def split_sentences(text):
-    """Split text into sentences; each entry is (text, line_number)."""
-    sentences = []
-    for line_no, line in enumerate(text.splitlines(), start=1):
-        line = line.strip()
-        if not line:
+_FENCE_START_RE = re.compile(r"^\s*(`{3,}|~{3,})")
+# Lines that start a new markdown block: keep them as paragraph boundaries
+# so list items / headings / quotes don't merge into mega-sentences.
+_BLOCK_START_RE = re.compile(r"^\s*(#{1,6}\s|>\s?|[-*+]\s|\d+[.)]\s|\|)")
+
+
+def _strip_fenced_code(text):
+    """Drop fenced code blocks (``` / ~~~); code is not prose."""
+    out, in_fence = [], False
+    for line in text.splitlines():
+        if _FENCE_START_RE.match(line):
+            in_fence = not in_fence
             continue
-        for part in _SENTENCE_SPLIT_RE.split(line):
-            part = part.strip()
-            if part:
-                sentences.append((part, line_no))
+        if not in_fence:
+            out.append(line)
+    return "\n".join(out)
+
+
+def _paragraphs_with_lines(text):
+    """Group hard-wrapped lines into paragraphs.
+
+    Consecutive non-blank lines form one paragraph (a line ending without
+    a blank line continues the paragraph); blank lines and markdown block
+    starts (headings, list items, quotes, tables) are boundaries.
+    Returns [[(line_text, line_number), ...], ...].
+    """
+    paras, buf = [], []
+    for i, raw in enumerate(text.splitlines(), start=1):
+        line = raw.strip()
+        if not line:
+            if buf:
+                paras.append(buf)
+                buf = []
+            continue
+        if _BLOCK_START_RE.match(line):
+            if buf:
+                paras.append(buf)
+            buf = [(line, i)]
+            continue
+        buf.append((line, i))
+    if buf:
+        paras.append(buf)
+    return paras
+
+
+def _sentence_bounds(para):
+    """Yield (start, end) offsets of sentences in a paragraph."""
+    bounds = [0]
+    bounds += [m.end() for m in re.finditer(r"(?<=[.!?;])\s+", para)]
+    bounds.append(len(para))
+    for a, b in zip(bounds, bounds[1:]):
+        if para[a:b].strip():
+            yield a, b
+
+
+def split_sentences(text):
+    """Split text into sentences; each entry is (text, line_number).
+
+    Fenced code blocks are excluded. Hard-wrapped lines are joined into
+    paragraphs first, so a long sentence broken across lines is still
+    measured whole. The line number is where the sentence starts.
+    """
+    sentences = []
+    for lines in _paragraphs_with_lines(_strip_fenced_code(text)):
+        para = " ".join(t for t, _ in lines)
+        offsets = []  # char offset where each source line starts in para
+        pos = 0
+        for t, _ in lines:
+            offsets.append(pos)
+            pos += len(t) + 1  # +1 for the joining space
+        for a, b in _sentence_bounds(para):
+            part = para[a:b].strip()
+            if not part:
+                continue
+            lineno = lines[0][1]
+            for idx, off in enumerate(offsets):
+                if off <= a:
+                    lineno = lines[idx][1]
+                else:
+                    break
+            sentences.append((part, lineno))
     return sentences
 
 

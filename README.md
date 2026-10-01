@@ -5,7 +5,9 @@ You can spot AI-written text in three seconds: the 60-word sentence that never l
 ## Install
 
 ```bash
-pip install plain-speak
+git clone https://github.com/hahahahahahahahah6/plain-speak
+cd plain-speak
+python3 plain_speak.py check draft.txt
 ```
 
 Or just grab the single file — it's stdlib-only, no dependencies:
@@ -15,7 +17,9 @@ curl -O https://raw.githubusercontent.com/hahahahahahahahah6/plain-speak/main/pl
 python3 plain_speak.py check draft.txt
 ```
 
-Python 3.9+.
+Python 3.9+. The examples below write `plain-speak` — that's shorthand for
+`python3 plain_speak.py` (symlink it onto your PATH as `plain-speak` if you
+like).
 
 ## Usage
 
