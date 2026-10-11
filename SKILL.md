@@ -67,6 +67,35 @@ PASSAGE:
 <flagged text>
 ```
 
+### 中文 — 去 AI 味改写 (v0.2.0)
+
+Use for: Chinese drafts flagged with `zh-*` rules. The CLI's Chinese word
+lists (L1/L2) and behavioral norms are adapted from the de-ai-smell skill
+(MIT, xiaoshuai1024/skills).
+
+Prompt template:
+
+```
+把下面这段中文改成真人说话的语气，像在工位上跟同事聊天，不要像周报念稿。
+- L1 禁词直接删掉或换具体说法：赋能→帮 X 做成什么；闭环→完整回路；沉淀→攒下/留下；
+  打通→连上/对接；兜底→回退/降级；说白了/先说/总之→删掉直接说结论；
+  至关重要→换具体影响；一句话/一件事/踩一遍→删掉或换具体所指。
+- 句式红线必须整句重写，不许只换词：
+  「不是 A，而是 B」→ 改成直陈（正面陈述 / 先后动作 / 因果句）；
+  破折号全篇最多留 2 处，其余换逗号/句号或拆句；
+  的链 ≥3 拆句；「进行/作出/加以 + 动词」删掉虚动词直接用动词；
+  「结论很明确：」这类形容词+冒号预判删掉，内容直接成句。
+- 套话开场（综上所述/众所周知/先聊聊）删掉直接进正题；
+  套话收尾（以上就是/希望对你有帮助/未来可期）删掉，让内容自然结束。
+- 「研究表明/数据显示」没有真实来源就删掉，不许编造来源。
+- 保真：删套话可以，造事实不行。原文没说的，输出不许说。
+
+TEXT:
+<flagged text>
+```
+
+Then re-run `plain-speak check` — the score is the referee, not your taste.
+
 ## Rules of thumb (all rungs)
 
 - **Buzzword → concrete swap cheat sheet:** leverage→use · utilize→use · delve→dig into / look at · robust→holds up when X · seamless→no extra steps · holistic→whole · synergy→working together · paradigm→model / way · landscape→field · realm→area · furthermore/moreover/additionally→and, or just start the sentence · foster→help grow · elevate→raise / improve · navigate→handle · underscore→show · unlock the potential→makes possible.

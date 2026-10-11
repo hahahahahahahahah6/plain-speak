@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "plain-speak"
+version = "0.2.0"
+description = "Bilingual (EN/ZH) readability linter: scores AI-generated text on plainness and flags AI-register slop"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "hao li" }]
+keywords = ["ai", "readability", "lint", "chinese", "writing", "agents"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Topic :: Text Processing :: Linguistic",
+    "Topic :: Software Development :: Quality Assurance",
+]
+
+[project.scripts]
+plain-speak = "plain_speak:main"
+
+[project.urls]
+Homepage = "https://github.com/hahahahahahahahah6/plain-speak"
+
+[tool.setuptools]
+py-modules = ["plain_speak"]
